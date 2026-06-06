@@ -616,3 +616,198 @@ MVP는 다음 조건을 만족하면 완료로 본다.
   - https://docs.expo.dev/versions/latest/sdk/sqlite/
 - RevenueCat React Native SDK: iOS/Android 구독 권한 관리 후보
   - https://www.revenuecat.com/docs/getting-started/installation/reactnative
+
+## GSTACK REVIEW REPORT
+
+작성일: 2026-06-06
+리뷰 대상: `docs/PRD.md`
+기준 커밋: `373373f`
+사용자 결정: `3번` 균형안
+복구 지점: `.omx/autoplan/prd-review-2026-06-06-restore.md`
+테스트 계획: `.omx/plans/picklog-test-plan-2026-06-06.md`
+
+### 1. Deep Interview 결정 요약
+
+질문: PRD를 고칠 때 어디까지 자동으로 바꿔도 되는가?
+
+답변: `3번` 균형안.
+
+해석:
+
+- Alpha는 로그인 없는 로컬 우선 개인 저장소로 빠르게 검증한다.
+- 데이터 모델, 삭제 정책, AI 추출 정책, 권한/과금 경계는 Pro와 동기화로 넘어갈 수 있게 지금 명시한다.
+- 공유 시트, 클라우드 백업, 결제는 첫 사용성을 늦추면 안 되지만, v1까지 가는 경로에서 다시 설계하지 않도록 PRD에 전환점을 남긴다.
+
+### 2. Autoplan 결론
+
+현재 PRD는 제품 방향이 좋고 개인 프로젝트의 현실감도 있다. 핵심 웨지인 "AI 쇼핑/생활 링크 저장함"은 충분히 작고, 30개 실제 저장 데이터셋으로 시작하자는 제안도 맞다.
+
+다만 구현 전에 아래 5개는 PRD 본문에 반영해야 한다. 모두 나중에 고치면 데이터 이관, 보안 구조, 앱스토어 심사, QA 기준이 흔들리는 항목이다.
+
+| 우선순위 | 항목 | 현재 위험 | 권장 조치 |
+| --- | --- | --- | --- |
+| P1 | URL fetch 보안 | 쇼핑몰/레시피/일반 URL 수집이 SSRF와 악성 HTML 입력을 열 수 있음 | URL fetch 안전 요구사항을 별도 섹션으로 추가 |
+| P1 | 삭제/보존 정책 | `input_snapshot`, `raw_output_json`, 이미지, 가격 기록이 영구 삭제와 충돌 가능 | 테이블별 삭제/보존/익명화 규칙 추가 |
+| P1 | 동기화 전환 모델 | 로컬 우선과 로그인/클라우드 전환이 데이터 모델에서 불명확 | `local_id`, `remote_id`, `device_id`, `sync_state`, `version`, `tombstone_until` 추가 |
+| P2 | 공유 시트 범위 | 7.1에서는 필수, 15장에서는 가능하면, 16장에서는 Beta로 충돌 | Alpha는 앱 내 붙여넣기/사진 선택, Beta는 공유 시트로 정리 |
+| P2 | AI 품질 지표 | "거의 수정하지 않고 저장"은 AI 결과 과신을 보상할 수 있음 | 30개 데이터셋 기반 필드별 정확도와 검색 성공률로 변경 |
+
+### 3. CEO / 제품 리뷰
+
+점수: 7.5/10
+
+강점:
+
+- "저장하면 알아서 정리하고 필요할 때 찾는다"는 약속이 선명하다.
+- 개인 프로젝트답게 Alpha 성공 기준이 "내가 매일 쓴다"로 잡혀 있다.
+- 쇼핑/생활 링크 저장함은 레시피, 쇼츠, 사진 메모로 확장하기 좋은 웨지다.
+
+제품 리스크:
+
+- 범위가 사진, 쇼핑 링크, 쇼츠, 레시피를 모두 포함해 Alpha 검증이 흐려질 수 있다.
+- Pro 수익화 항목이 많지만, 사용자가 돈을 내는 순간이 아직 구체적이지 않다.
+- 가격 추적과 클라우드 백업은 가치가 크지만 운영 비용과 정책 부담도 크다.
+
+권장 방향:
+
+- Alpha의 북극성은 "30개 실제 저장 항목을 다시 찾는 데 성공하는가"로 둔다.
+- 첫 화면은 커뮤니티나 추천이 아니라 `저장함 + 빠른 추가 + 검색`이어야 한다.
+- Pro는 Alpha에 넣지 말고, 데이터 모델과 설정 화면에 `Pro-ready` 경계만 둔다.
+
+### 4. 디자인 / UX 리뷰
+
+점수: 6.5/10
+
+필수 보강:
+
+- 캡처 상태 매트릭스가 필요하다: 추출 중, 낮은 신뢰도, 일부 필드 실패, 지원하지 않는 링크, 접근 제한 플랫폼, AI 실패, 수동 저장.
+- 상세 화면은 AI 결과와 사용자 수정값을 구분해야 한다. 사용자는 "AI가 추정한 가격"과 "내가 확정한 가격"을 다르게 신뢰한다.
+- 카드 UI는 출처별 변형이 필요하다. 쇼핑 카드는 가격/판매처, 레시피 카드는 재료/시간, 쇼츠 카드는 크리에이터/저장 이유가 먼저 보여야 한다.
+- 휴지통과 영구 삭제는 되돌릴 수 없는 순간을 명확히 보여야 한다.
+- 무료 한도/AI 사용량/Pro 업셀은 저장 직후를 방해하지 않는 위치에 둔다.
+
+권장 IA:
+
+```text
+Home
+  +-- Quick Add: Photo | Link
+  +-- Recent Saves
+  +-- Search bar
+  +-- Filter chips
+
+Item Detail
+  +-- Source preview
+  +-- AI fields
+  +-- User note
+  +-- Extraction confidence
+  +-- Archive / Delete
+
+Settings
+  +-- Local data
+  +-- AI usage
+  +-- Backup and sync
+  +-- Pro
+  +-- Privacy
+```
+
+### 5. Engineering 리뷰
+
+점수: 6/10
+
+아키텍처 권장안:
+
+```text
+Mobile App
+  |
+  +-- Capture UI
+  |     +-- Photo picker / camera
+  |     +-- Paste URL
+  |     +-- Share sheet handler (Beta)
+  |
+  +-- Local Store (SQLite)
+  |     +-- items
+  |     +-- attachments
+  |     +-- extractions
+  |     +-- price_observations
+  |     +-- sync_queue (future)
+  |
+  +-- Server AI API
+        |
+        +-- URL safety gate
+        +-- Metadata fetcher
+        +-- Vision / structured extraction
+        +-- Schema validator
+        +-- Cost and quota tracker
+```
+
+주요 엔지니어링 이슈:
+
+- URL 메타데이터 수집은 서버에서만 수행하고, 앱에는 API 키나 fetch 우회 로직을 두지 않는다.
+- URL fetcher는 `http/https`만 허용하고, localhost/private IP/link-local/cloud metadata IP, 과도한 redirect, 큰 응답, 비HTML 응답, 긴 timeout을 차단해야 한다.
+- AI 출력은 JSON 스키마 검증 후 저장하고, 실패 시 수동 저장으로 빠져야 한다.
+- `raw_output_json`과 `input_snapshot`은 디버깅에는 유용하지만 개인정보와 삭제권 리스크가 있으므로 보존 기간과 삭제 연동을 정해야 한다.
+- 로컬 우선이어도 미래 동기화를 위해 모든 레코드에 충돌 해결용 필드를 준비해야 한다.
+
+테스트 공백:
+
+- URL 보안 유닛 테스트가 없다.
+- 삭제 cascade 테스트가 없다.
+- 30개 데이터셋 기반 AI eval 기준이 없다.
+- 공유 시트는 Expo 문서상 네이티브 설정과 실험적 수신 흐름이 있으므로 실제 기기 E2E가 필요하다.
+
+### 6. DX 리뷰
+
+적용 범위: 제한적.
+
+이 PRD는 개발자용 API/SDK/CLI 제품이 아니라 소비자 모바일 앱이다. 따라서 정식 DX 리뷰 대상은 아니다. 다만 개인 프로젝트의 개발자 경험 관점에서 다음은 PRD에 남길 가치가 있다.
+
+- 로컬 개발에서 AI 서버 없이 수동 입력/fixture로 앱을 실행할 수 있어야 한다.
+- 30개 Alpha 데이터셋은 앱 fixture와 AI eval fixture로 동시에 쓰여야 한다.
+- 서버 AI API는 OpenAPI 또는 간단한 typed contract로 고정해 모바일/서버 병렬 개발을 가능하게 한다.
+
+### 7. 결정 감사 로그
+
+자동 결정:
+
+- `Approach A` 유지: Alpha 개인 사용성과 비용 제어가 가장 중요하다.
+- Pro 기능은 Alpha 필수에서 제외: 수익화 준비는 데이터 모델과 설정 화면 경계로 충분하다.
+- DX 리뷰는 축소 적용: 이 제품은 개발자 플랫폼이 아니다.
+
+사용자 확인 결정:
+
+- PRD 수정/리뷰 방향: `3번` 균형안.
+
+남은 사용자 결정:
+
+- 첫 구현 범위에서 공유 시트를 Alpha에서 완전히 제외할지, 기술 spike만 할지.
+- 클라우드 백업을 Beta 필수로 둘지, v1 전환 항목으로 늦출지.
+- AI 추출 raw 로그 보존 기간을 0일, 7일, 30일 중 어디로 둘지.
+
+### 8. 권장 PRD 패치 목록
+
+다음 패치를 별도 작업으로 PRD 본문에 반영하는 것을 권장한다.
+
+1. 7.1 저장 입력에서 공유 시트를 필수에서 제거하고 Beta 항목으로 일관화한다.
+2. 10장 데이터 모델에 동기화 준비 필드와 `sync_queue` 또는 `sync_events`를 추가한다.
+3. 11장 AI 추출 설계에 URL 안전 게이트와 prompt-injection 방어 원칙을 추가한다.
+4. 13장 개인정보와 보안에 테이블별 삭제/보존 정책을 추가한다.
+5. 14장 성공 지표를 필드별 정확도, 검색 성공률, 저장 완료 시간으로 바꾼다.
+6. 15장 MVP 범위에 "AI 실패 시 수동 저장"과 "삭제 cascade"를 명시한다.
+7. 19장 수용 기준에 URL fetch 보안, 삭제 cascade, 30개 데이터셋 eval 통과 기준을 추가한다.
+
+### 9. 완료 기준 제안
+
+Alpha 완료:
+
+- 본인이 30개 실제 항목을 저장한다.
+- 저장 1건당 평균 완료 시간이 10초 이하이다.
+- 30개 데이터셋에서 필수 필드 허용 정확도 80% 이상이다.
+- 저장한 항목 중 70% 이상을 예상 검색어로 다시 찾을 수 있다.
+- AI 실패, 링크 접근 실패, 낮은 신뢰도 상태에서도 수동 저장을 완료할 수 있다.
+
+Beta 완료:
+
+- 공유 시트 수신이 iOS/Android 실제 기기에서 동작한다.
+- 로그인/백업/복원이 최소 1회 이상 검증된다.
+- 계정 삭제와 데이터 삭제 흐름이 앱 안에서 끝난다.
+- Pro 제한 UI가 저장 흐름을 방해하지 않는다.
