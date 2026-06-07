@@ -60,6 +60,33 @@ pnpm run check
 pnpm run format
 ```
 
+## 모바일 앱 실행
+
+Expo Go를 사용할 수 없는 지역이나 환경에서는 QR 코드로 Expo Go를 여는 대신 로컬 네이티브 개발 빌드로 실행합니다.
+
+```bash
+pnpm install
+pnpm run mobile:ios
+```
+
+Android 에뮬레이터나 연결된 Android 기기에서는 다음 명령을 사용합니다.
+
+```bash
+pnpm run mobile:android
+```
+
+이미 개발 빌드가 설치되어 있고 Metro 서버만 다시 띄우려면 다음 명령을 사용합니다.
+
+```bash
+pnpm run mobile:dev-client
+```
+
+`pnpm`이 PATH에 없다면 이 머신의 pnpm 바이너리를 직접 사용할 수 있습니다.
+
+```bash
+/Users/manuel71/Library/pnpm/.tools/pnpm-exe/10.33.0/pnpm run mobile:ios
+```
+
 ## 런타임 참고
 
 Supabase Edge Function은 의도적으로 AI provider를 설정하지 않은 상태로 둡니다. Beta 전에 provider policy가 승인되기 전까지 이 function은 server-only AI boundary를 유지하고, AI extraction을 사용할 수 없을 때 normalized failure path를 반환합니다.

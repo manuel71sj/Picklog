@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { stableHash } from "./runtime.ts";
 import type { ExtractUrlErrorCode } from "./types.ts";
 
 export const SENSITIVE_QUERY_NAMES = new Set([
@@ -85,7 +85,7 @@ export function normalizeUrl(input: string): string {
 
 export function computeRequestHash(url: string, schemaVersion: string): string {
   const normalized = normalizeUrl(url);
-  return createHash("sha256").update(`${schemaVersion}\n${normalized}`).digest("hex");
+  return stableHash(`${schemaVersion}\n${normalized}`);
 }
 
 export function validateFetchEnvelope(input: {

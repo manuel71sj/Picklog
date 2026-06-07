@@ -3,10 +3,22 @@
   "version": "0.1.0-alpha.1",
   "private": true,
   "main": "index.ts",
+  "scripts": {
+    "start": "expo start --localhost",
+    "dev-client": "expo start --dev-client --localhost",
+    "ios": "expo run:ios",
+    "android": "expo run:android",
+    "prebuild": "expo prebuild",
+    "web": "expo start --web"
+  },
   "dependencies": {
     "expo": "latest",
+    "expo-sqlite": "latest",
     "react": "latest",
-    "react-native": "latest",
-    "expo-sqlite": "latest"
+    "react-native": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.17",
+    "typescript": "~6.0.3"
   }
 }

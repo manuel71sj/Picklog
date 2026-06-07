@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
 import { rawOutputExpiresAt } from "./metadata.ts";
+import { createLocalId } from "./runtime.ts";
 import { assertValidPicklogDraft, buildInitialFieldState, markUserEdits } from "./schema.ts";
 import {
   type AttachmentRecord,
@@ -49,7 +49,7 @@ export class PicklogStore {
     assertValidPicklogDraft(input.draft);
     const now = (input.now ?? new Date()).toISOString();
     const extraction: ExtractionRecord = {
-      id: randomUUID(),
+      id: createLocalId(),
       item_id: null,
       input_type: "url",
       input_snapshot: {
@@ -69,8 +69,8 @@ export class PicklogStore {
     const merged = { ...input.draft, ...input.user_edits };
     const fieldState = markUserEdits(buildInitialFieldState(input.draft), input.user_edits ?? {});
     const item: ItemRecord = {
-      id: randomUUID(),
-      local_id: randomUUID(),
+      id: createLocalId(),
+      local_id: createLocalId(),
       remote_id: null,
       user_id: null,
       device_id: input.device_id,
@@ -120,8 +120,8 @@ export class PicklogStore {
   saveManual(input: ManualSaveInput): ItemRecord {
     const now = (input.now ?? new Date()).toISOString();
     const item: ItemRecord = {
-      id: randomUUID(),
-      local_id: randomUUID(),
+      id: createLocalId(),
+      local_id: createLocalId(),
       remote_id: null,
       user_id: null,
       device_id: input.device_id,
@@ -324,7 +324,7 @@ export class PicklogStore {
     const metadata = item.metadata_json;
     if (metadata.price === undefined && !metadata.seller) return;
     this.price_observations.push({
-      id: randomUUID(),
+      id: createLocalId(),
       item_id: item.id,
       seller: metadata.seller ?? null,
       price: metadata.price ?? null,
@@ -342,7 +342,14 @@ export class PicklogStore {
     metadata_json: Record<string, unknown>,
     occurred_at: string,
   ): void {
-    this.usage_events.push({ id: randomUUID(), event_type, item_local_id, extraction_id, metadata_json, occurred_at });
+    this.usage_events.push({
+      id: createLocalId(),
+      event_type,
+      item_local_id,
+      extraction_id,
+      metadata_json,
+      occurred_at,
+    });
   }
 
   private recordSync(
@@ -352,7 +359,7 @@ export class PicklogStore {
     now: string,
   ): void {
     this.sync_queue.push({
-      id: randomUUID(),
+      id: createLocalId(),
       schema_version: SYNC_EVENT_SCHEMA_VERSION,
       queue_mode: "alpha_audit",
       entity_type: "item",

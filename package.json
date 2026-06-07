@@ -13,6 +13,10 @@
     "format:check": "biome format .",
     "check": "biome check .",
     "check:write": "biome check --write .",
+    "mobile:start": "pnpm --dir apps/mobile start",
+    "mobile:ios": "pnpm --dir apps/mobile ios",
+    "mobile:android": "pnpm --dir apps/mobile android",
+    "mobile:dev-client": "pnpm --dir apps/mobile dev-client",
     "verify": "pnpm run typecheck && pnpm run check && pnpm run test"
   },
   "devDependencies": {
