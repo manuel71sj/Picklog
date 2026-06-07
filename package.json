@@ -1,0 +1,24 @@
+{
+  "name": "picklog",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "Picklog Alpha Slice 1 local-first app and extraction contracts.",
+  "packageManager": "pnpm@10.33.3",
+  "scripts": {
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "typecheck": "sh -c 'for f in packages/shared/src/*.ts tests/*.ts apps/mobile/src/*.ts supabase/functions/extract-url/*.ts; do node --experimental-strip-types --check \"$f\" || exit 1; done'",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check .",
+    "check:write": "biome check --write .",
+    "verify": "pnpm run typecheck && pnpm run check && pnpm run test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

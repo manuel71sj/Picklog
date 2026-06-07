@@ -1,0 +1,12 @@
+{
+  "name": "@picklog/mobile",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "main": "index.ts",
+  "dependencies": {
+    "expo": "latest",
+    "react": "latest",
+    "react-native": "latest",
+    "expo-sqlite": "latest"
+  }
+}
