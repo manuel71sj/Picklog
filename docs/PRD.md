@@ -156,7 +156,7 @@ MVP에서 하지 않는다.
 - `use_case`: 사용 목적
 - `tags`: 검색용 태그
 - `source_type`: photo, shopping_url, youtube_url, instagram_url, recipe_url, article_url, unknown
-- `source_url`: 원본 링크
+- `source_url`: 원본 링크. `source_type=photo`에서는 비어 있을 수 있고, 이미지 참조는 `thumbnail_url`, `image_asset_id`, `attachments`가 소유한다.
 - `thumbnail_url`: 썸네일 또는 업로드 이미지
 - `confidence`: AI 추출 신뢰도
 - `extraction_notes`: 불확실하거나 사용자가 확인해야 할 내용
@@ -392,7 +392,7 @@ MVP는 **Approach A: 로컬 우선 개인 저장소**로 시작한다.
 - `version`
 - `status`: active, archived, deleted
 - `source_type`
-- `source_url`
+- `source_url`: URL 항목은 필수, 사진 항목은 nullable
 - `title`
 - `summary`
 - `category`
