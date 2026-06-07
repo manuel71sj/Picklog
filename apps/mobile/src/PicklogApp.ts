@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Linking, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Linking, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import {
   type ExtractUrlError,
   type FieldState,
@@ -168,7 +168,7 @@ export function PicklogApp() {
   };
 
   return React.createElement(
-    SafeAreaView,
+    View,
     { style: { flex: 1, backgroundColor: "#FAF8F4" } },
     React.createElement(
       ScrollView,

@@ -87,6 +87,17 @@ pnpm run mobile:dev-client
 /Users/manuel71/Library/pnpm/.tools/pnpm-exe/10.33.0/pnpm run mobile:ios
 ```
 
+### iOS Simulator 로그 참고
+
+`pnpm run mobile:ios` 실행 중 `Build Succeeded`, `Opening on iPhone ...`, `iOS Bundled ...`가 출력된 뒤 다음 로그가 반복될 수 있습니다.
+
+```text
+CoreHaptics ... Failed to read pattern library data
+UIKitCore ... Error creating CHHapticPattern
+```
+
+이 메시지는 iOS Simulator의 키보드/햅틱 피드백 관련 시스템 로그이며, 앱 빌드 실패나 JavaScript 번들 오류가 아닙니다. 앱 화면이 열리고 Metro가 `iOS Bundled ...`를 출력했다면 실행은 성공한 상태입니다.
+
 ## 런타임 참고
 
 Supabase Edge Function은 의도적으로 AI provider를 설정하지 않은 상태로 둡니다. Beta 전에 provider policy가 승인되기 전까지 이 function은 server-only AI boundary를 유지하고, AI extraction을 사용할 수 없을 때 normalized failure path를 반환합니다.
