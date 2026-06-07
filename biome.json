@@ -7,16 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!node_modules",
-      "!dist",
-      "!build",
-      "!coverage",
-      "!ios",
-      "!android",
-      "!.omx"
-    ]
+    "includes": ["**", "!node_modules", "!dist", "!build", "!coverage", "!ios", "!android", "!.omx"]
   },
   "formatter": {
     "enabled": true,

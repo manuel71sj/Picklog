@@ -1,11 +1,26 @@
-import { extractUrl, IdempotencyStore, SCHEMA_VERSION, type ExtractUrlRequest } from "../../../packages/shared/src/index.ts";
+import {
+  type ExtractUrlRequest,
+  extractUrl,
+  IdempotencyStore,
+  SCHEMA_VERSION,
+} from "../../../packages/shared/src/index.ts";
 
 const idempotency = new IdempotencyStore();
 
 export async function handleExtractUrlRequest(request: Request): Promise<Response> {
-  const body = await request.json() as ExtractUrlRequest;
+  const body = (await request.json()) as ExtractUrlRequest;
   if (body.client_schema_version !== SCHEMA_VERSION) {
-    return json({ status: "error", request_id: body.request_id, error_code: "schema_invalid", retryable: true, manual_save_allowed: true, message_key: "extract.schema_invalid" }, 422);
+    return json(
+      {
+        status: "error",
+        request_id: body.request_id,
+        error_code: "schema_invalid",
+        retryable: true,
+        manual_save_allowed: true,
+        message_key: "extract.schema_invalid",
+      },
+      422,
+    );
   }
   const begun = idempotency.begin(body);
   if (!begun.proceed) return json(begun.response, begun.response.status === "error" ? 409 : 200);
@@ -18,7 +33,7 @@ export async function handleExtractUrlRequest(request: Request): Promise<Respons
       try {
         const fetchResponse = await fetch(canonicalUrl, {
           redirect: "follow",
-          signal: controller.signal
+          signal: controller.signal,
         });
         const bodyText = await fetchResponse.text();
         return {
@@ -27,7 +42,7 @@ export async function handleExtractUrlRequest(request: Request): Promise<Respons
           redirect_count: 0,
           body: bodyText,
           response_bytes: new TextEncoder().encode(bodyText).byteLength,
-          elapsed_ms: Date.now() - started
+          elapsed_ms: Date.now() - started,
         };
       } finally {
         clearTimeout(timeout);
@@ -35,7 +50,7 @@ export async function handleExtractUrlRequest(request: Request): Promise<Respons
     },
     extractWithAi: async () => {
       throw new Error("AI provider is not configured for local Alpha skeleton.");
-    }
+    },
   });
   idempotency.finish(begun.key, response);
   return json(response, response.status === "draft" ? 200 : 422);
@@ -44,7 +59,7 @@ export async function handleExtractUrlRequest(request: Request): Promise<Respons
 function json(value: unknown, status = 200): Response {
   return new Response(JSON.stringify(value), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8" }
+    headers: { "content-type": "application/json; charset=utf-8" },
   });
 }
 

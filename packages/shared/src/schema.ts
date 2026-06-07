@@ -1,4 +1,4 @@
-import { SCHEMA_VERSION, type FieldState, type MetadataKind, type PicklogDraft, type SourceType } from "./types.ts";
+import { type FieldState, type MetadataKind, type PicklogDraft, SCHEMA_VERSION, type SourceType } from "./types.ts";
 
 const KIND_BY_SOURCE_TYPE: Record<SourceType, MetadataKind> = {
   shopping_url: "shopping",
@@ -7,7 +7,7 @@ const KIND_BY_SOURCE_TYPE: Record<SourceType, MetadataKind> = {
   instagram_url: "video",
   article_url: "article",
   photo: "photo",
-  unknown: "unknown"
+  unknown: "unknown",
 };
 
 const REQUIRED_BY_KIND: Record<MetadataKind, string[]> = {
@@ -16,7 +16,7 @@ const REQUIRED_BY_KIND: Record<MetadataKind, string[]> = {
   video: ["platform", "video_title", "needs_review"],
   article: ["site_name", "article_title", "needs_review"],
   photo: ["photo_count", "needs_review"],
-  unknown: ["needs_review"]
+  unknown: ["needs_review"],
 };
 
 export interface ValidationIssue {
@@ -53,7 +53,7 @@ export function validatePicklogDraft(value: unknown): ValidationResult {
     if (metadata.kind !== expectedKind) {
       issues.push({
         path: "metadata.kind",
-        message: `metadata.kind must be ${expectedKind} for ${draft.source_type}.`
+        message: `metadata.kind must be ${expectedKind} for ${draft.source_type}.`,
       });
     }
     for (const field of REQUIRED_BY_KIND[expectedKind]) {
@@ -81,7 +81,7 @@ export function validatePicklogDraft(value: unknown): ValidationResult {
       if (typeof confidence === "number" && confidence < 0.8 && !draft.needs_review.includes(field)) {
         issues.push({
           path: `needs_review.${field}`,
-          message: "Low-confidence price or seller must be marked for review."
+          message: "Low-confidence price or seller must be marked for review.",
         });
       }
     }
@@ -105,7 +105,7 @@ export function buildInitialFieldState(draft: PicklogDraft): Record<string, Fiel
     "use_case",
     "tags",
     ...Object.keys(draft.field_confidence),
-    ...draft.needs_review
+    ...draft.needs_review,
   ]);
   for (const field of fields) {
     state[field] = draft.needs_review.includes(field) ? "needs_review" : "ai_draft";
@@ -115,7 +115,7 @@ export function buildInitialFieldState(draft: PicklogDraft): Record<string, Fiel
 
 export function markUserEdits(
   existing: Record<string, FieldState>,
-  edits: Record<string, unknown>
+  edits: Record<string, unknown>,
 ): Record<string, FieldState> {
   const next = { ...existing };
   for (const [field, value] of Object.entries(edits)) {

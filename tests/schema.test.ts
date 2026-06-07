@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { buildInitialFieldState, markUserEdits, validatePicklogDraft } from "../packages/shared/src/index.ts";
 import { shoppingDraft } from "./helpers.ts";
 
@@ -13,7 +13,7 @@ test("picklog_item_v1 validator blocks malformed schema and missing fields", () 
     schema_version: "wrong",
     title: "",
     source_type: "shopping_url",
-    metadata: { kind: "article" }
+    metadata: { kind: "article" },
   });
   assert.equal(result.ok, false);
   assert.ok(result.issues.some((issue) => issue.path === "schema_version"));
@@ -29,8 +29,8 @@ test("low-confidence price and seller must be marked as needs_review", () => {
       product_name: "무선 스탠드 조명",
       price: 59000,
       currency: "KRW",
-      needs_review: []
-    }
+      needs_review: [],
+    },
   });
   const result = validatePicklogDraft(draft);
   assert.equal(result.ok, false);

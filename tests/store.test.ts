@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { PicklogStore } from "../packages/shared/src/index.ts";
 import { shoppingDraft } from "./helpers.ts";
 
@@ -12,7 +12,7 @@ test("draft save creates immutable extraction snapshot, price observation, usage
     fetch_summary: { content_type: "text/html" },
     raw_output_json: { draft: true },
     user_edits: { title: "내가 확정한 조명", user_note: "침실 후보" },
-    now: new Date("2026-06-07T00:00:00.000Z")
+    now: new Date("2026-06-07T00:00:00.000Z"),
   });
 
   assert.equal(item.title, "내가 확정한 조명");
@@ -35,7 +35,7 @@ test("invalid draft save fails before partial records are written", () => {
       device_id: "dev-1",
       canonical_url: "https://store.example.com/lamp",
       draft: { ...shoppingDraft(), needs_review: [] },
-      fetch_summary: {}
+      fetch_summary: {},
     });
   });
   assert.equal(store.items.length, 0);
@@ -51,7 +51,7 @@ test("search finds saved records and respects archived and deleted defaults", ()
     device_id: "dev-1",
     canonical_url: "https://store.example.com/lamp",
     draft: shoppingDraft(),
-    fetch_summary: {}
+    fetch_summary: {},
   });
 
   assert.equal(store.search({ query: "침실" }).length, 1);
@@ -74,7 +74,7 @@ test("permanent delete scrubs user content, cascades linked records, and breaks 
     draft: shoppingDraft(),
     fetch_summary: {},
     raw_output_json: { private: "raw" },
-    user_edits: { user_note: "private note" }
+    user_edits: { user_note: "private note" },
   });
   store.delete(item.local_id);
   const tombstone = store.permanentlyDelete(item.local_id, new Date("2026-06-07T00:00:00.000Z"));
@@ -102,7 +102,7 @@ test("expired raw AI outputs are deleted after seven days", () => {
     draft: shoppingDraft(),
     fetch_summary: {},
     raw_output_json: { raw: true },
-    now: new Date("2026-06-01T00:00:00.000Z")
+    now: new Date("2026-06-01T00:00:00.000Z"),
   });
   assert.equal(store.extractions[0].raw_output_json?.raw, true);
   assert.equal(store.cleanupExpiredRawOutputs(new Date("2026-06-08T00:00:01.000Z")), 1);

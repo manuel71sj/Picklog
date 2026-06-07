@@ -1,6 +1,6 @@
-import test from "node:test";
 import assert from "node:assert/strict";
-import { IdempotencyStore, SCHEMA_VERSION, type ExtractUrlSuccess } from "../packages/shared/src/index.ts";
+import test from "node:test";
+import { type ExtractUrlSuccess, IdempotencyStore, SCHEMA_VERSION } from "../packages/shared/src/index.ts";
 import { shoppingDraft } from "./helpers.ts";
 
 test("idempotency prevents duplicate work while in progress and replays terminal success", () => {
@@ -9,7 +9,7 @@ test("idempotency prevents duplicate work while in progress and replays terminal
     request_id: "req-1",
     device_id: "dev-1",
     url: "https://example.com/item",
-    client_schema_version: SCHEMA_VERSION
+    client_schema_version: SCHEMA_VERSION,
   };
   const first = store.begin(request);
   assert.equal(first.proceed, true);
@@ -23,8 +23,13 @@ test("idempotency prevents duplicate work while in progress and replays terminal
     schema_version: SCHEMA_VERSION,
     canonical_url: "https://example.com/item",
     canonical_origin: "https://example.com",
-    fetch_summary: { content_type: "text/html", final_url: "https://example.com/item", redirect_count: 0, body_truncated: false },
-    draft: shoppingDraft()
+    fetch_summary: {
+      content_type: "text/html",
+      final_url: "https://example.com/item",
+      redirect_count: 0,
+      body_truncated: false,
+    },
+    draft: shoppingDraft(),
   };
   if (first.proceed) store.finish(first.key, response);
   const replay = store.begin(request);
@@ -38,14 +43,14 @@ test("idempotency returns conflict for same request id with different request ha
     request_id: "req-1",
     device_id: "dev-1",
     url: "https://example.com/a",
-    client_schema_version: SCHEMA_VERSION
+    client_schema_version: SCHEMA_VERSION,
   });
   assert.equal(first.proceed, true);
   const conflict = store.begin({
     request_id: "req-1",
     device_id: "dev-1",
     url: "https://example.com/b",
-    client_schema_version: SCHEMA_VERSION
+    client_schema_version: SCHEMA_VERSION,
   });
   assert.equal(conflict.proceed, false);
   if (!conflict.proceed) assert.equal(conflict.response.error_code, "idempotency_conflict");

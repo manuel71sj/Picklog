@@ -2,17 +2,17 @@ import { randomUUID } from "node:crypto";
 import { rawOutputExpiresAt } from "./metadata.ts";
 import { assertValidPicklogDraft, buildInitialFieldState, markUserEdits } from "./schema.ts";
 import {
-  SCHEMA_VERSION,
-  SYNC_EVENT_SCHEMA_VERSION,
   type AttachmentRecord,
   type ExtractionRecord,
   type ItemRecord,
   type PicklogDraft,
   type PriceObservationRecord,
+  SCHEMA_VERSION,
   type SearchFilters,
   type SourceType,
+  SYNC_EVENT_SCHEMA_VERSION,
   type SyncQueueRecord,
-  type UsageEventRecord
+  type UsageEventRecord,
 } from "./types.ts";
 
 interface SaveDraftInput {
@@ -54,7 +54,7 @@ export class PicklogStore {
       input_type: "url",
       input_snapshot: {
         canonical_url: input.canonical_url,
-        fetch_summary: input.fetch_summary
+        fetch_summary: input.fetch_summary,
       },
       model_provider: "configured-server-provider",
       model_name: "configured-structured-output-model",
@@ -64,7 +64,7 @@ export class PicklogStore {
       confidence: input.draft.confidence,
       error: null,
       created_at: now,
-      expires_at: input.raw_output_json ? rawOutputExpiresAt(input.now ?? new Date()) : null
+      expires_at: input.raw_output_json ? rawOutputExpiresAt(input.now ?? new Date()) : null,
     };
     const merged = { ...input.draft, ...input.user_edits };
     const fieldState = markUserEdits(buildInitialFieldState(input.draft), input.user_edits ?? {});
@@ -96,19 +96,24 @@ export class PicklogStore {
       updated_at: now,
       archived_at: null,
       deleted_at: null,
-      tombstone_until: null
+      tombstone_until: null,
     };
     extraction.item_id = item.id;
     this.extractions.push(extraction);
     this.items.push(item);
     this.createPriceObservationFromItem(item, now, "ai");
     this.recordUsage("ai_extraction_succeeded", item.local_id, extraction.id, { source_type: item.source_type }, now);
-    this.recordSync(item.local_id, "create", {
-      entity_local_id: item.local_id,
-      entity_type: "item",
-      created_at: now,
-      changed_fields: ["title", "category", "use_case", "tags", "source_type", "metadata_json"]
-    }, now);
+    this.recordSync(
+      item.local_id,
+      "create",
+      {
+        entity_local_id: item.local_id,
+        entity_type: "item",
+        created_at: now,
+        changed_fields: ["title", "category", "use_case", "tags", "source_type", "metadata_json"],
+      },
+      now,
+    );
     return item;
   }
 
@@ -139,7 +144,7 @@ export class PicklogStore {
         title: "user_confirmed",
         category: input.category ? "user_confirmed" : "user_empty",
         use_case: input.use_case ? "user_confirmed" : "user_empty",
-        tags: input.tags?.length ? "user_confirmed" : "user_empty"
+        tags: input.tags?.length ? "user_confirmed" : "user_empty",
       },
       extraction_id: null,
       user_note: input.user_note ?? null,
@@ -147,20 +152,28 @@ export class PicklogStore {
       updated_at: now,
       archived_at: null,
       deleted_at: null,
-      tombstone_until: null
+      tombstone_until: null,
     };
     this.items.push(item);
     this.recordUsage("manual_save", item.local_id, null, { source_type: item.source_type }, now);
-    this.recordSync(item.local_id, "create", {
-      entity_local_id: item.local_id,
-      entity_type: "item",
-      created_at: now,
-      changed_fields: ["title", "category", "use_case", "tags", "source_type"]
-    }, now);
+    this.recordSync(
+      item.local_id,
+      "create",
+      {
+        entity_local_id: item.local_id,
+        entity_type: "item",
+        created_at: now,
+        changed_fields: ["title", "category", "use_case", "tags", "source_type"],
+      },
+      now,
+    );
     return item;
   }
 
-  updateItem(localId: string, edits: Partial<Pick<ItemRecord, "title" | "category" | "use_case" | "tags" | "user_note">>): ItemRecord {
+  updateItem(
+    localId: string,
+    edits: Partial<Pick<ItemRecord, "title" | "category" | "use_case" | "tags" | "user_note">>,
+  ): ItemRecord {
     const item = this.requireItem(localId);
     const now = new Date().toISOString();
     Object.assign(item, edits);
@@ -242,18 +255,27 @@ export class PicklogStore {
         event.metadata_json = { scrubbed: true };
       }
     }
-    this.recordSync(item.local_id, "permanent_delete", {
-      deleted_at: item.deleted_at,
-      tombstone_until: tombstoneUntil,
-      version: item.version
-    }, now);
+    this.recordSync(
+      item.local_id,
+      "permanent_delete",
+      {
+        deleted_at: item.deleted_at,
+        tombstone_until: tombstoneUntil,
+        version: item.version,
+      },
+      now,
+    );
     return item;
   }
 
   cleanupExpiredRawOutputs(nowDate = new Date()): number {
     let count = 0;
     for (const extraction of this.extractions) {
-      if (extraction.expires_at && new Date(extraction.expires_at).getTime() <= nowDate.getTime() && extraction.raw_output_json) {
+      if (
+        extraction.expires_at &&
+        new Date(extraction.expires_at).getTime() <= nowDate.getTime() &&
+        extraction.raw_output_json
+      ) {
         extraction.raw_output_json = null;
         count += 1;
       }
@@ -279,7 +301,9 @@ export class PicklogStore {
 
     switch (filters.sort ?? "recent") {
       case "price_asc":
-        results = results.sort((a, b) => (extractPrice(a) ?? Number.MAX_SAFE_INTEGER) - (extractPrice(b) ?? Number.MAX_SAFE_INTEGER));
+        results = results.sort(
+          (a, b) => (extractPrice(a) ?? Number.MAX_SAFE_INTEGER) - (extractPrice(b) ?? Number.MAX_SAFE_INTEGER),
+        );
         break;
       case "name_asc":
         results = results.sort((a, b) => a.title.localeCompare(b.title));
@@ -291,7 +315,11 @@ export class PicklogStore {
     return results;
   }
 
-  private createPriceObservationFromItem(item: ItemRecord, observed_at: string, source: "metadata" | "ai" | "user"): void {
+  private createPriceObservationFromItem(
+    item: ItemRecord,
+    observed_at: string,
+    source: "metadata" | "ai" | "user",
+  ): void {
     if (item.metadata_json.kind !== "shopping") return;
     const metadata = item.metadata_json;
     if (metadata.price === undefined && !metadata.seller) return;
@@ -303,15 +331,26 @@ export class PicklogStore {
       currency: metadata.currency ?? null,
       observed_at,
       source,
-      needs_review: metadata.needs_review.includes("price") || metadata.needs_review.includes("seller")
+      needs_review: metadata.needs_review.includes("price") || metadata.needs_review.includes("seller"),
     });
   }
 
-  private recordUsage(event_type: UsageEventRecord["event_type"], item_local_id: string | null, extraction_id: string | null, metadata_json: Record<string, unknown>, occurred_at: string): void {
+  private recordUsage(
+    event_type: UsageEventRecord["event_type"],
+    item_local_id: string | null,
+    extraction_id: string | null,
+    metadata_json: Record<string, unknown>,
+    occurred_at: string,
+  ): void {
     this.usage_events.push({ id: randomUUID(), event_type, item_local_id, extraction_id, metadata_json, occurred_at });
   }
 
-  private recordSync(entity_local_id: string, operation: SyncQueueRecord["operation"], payload_json: Record<string, unknown>, now: string): void {
+  private recordSync(
+    entity_local_id: string,
+    operation: SyncQueueRecord["operation"],
+    payload_json: Record<string, unknown>,
+    now: string,
+  ): void {
     this.sync_queue.push({
       id: randomUUID(),
       schema_version: SYNC_EVENT_SCHEMA_VERSION,
@@ -324,7 +363,7 @@ export class PicklogStore {
       attempt_count: 0,
       last_error: null,
       created_at: now,
-      updated_at: now
+      updated_at: now,
     });
   }
 
@@ -336,11 +375,11 @@ export class PicklogStore {
 }
 
 function extractSeller(item: ItemRecord): string {
-  return item.metadata_json.kind === "shopping" ? item.metadata_json.seller ?? "" : "";
+  return item.metadata_json.kind === "shopping" ? (item.metadata_json.seller ?? "") : "";
 }
 
 function extractPrice(item: ItemRecord): number | null {
-  return item.metadata_json.kind === "shopping" ? item.metadata_json.price ?? null : null;
+  return item.metadata_json.kind === "shopping" ? (item.metadata_json.price ?? null) : null;
 }
 
 function searchCorpus(item: ItemRecord): string {
@@ -354,6 +393,9 @@ function searchCorpus(item: ItemRecord): string {
     item.source_type,
     item.source_url,
     metadata,
-    item.user_note
-  ].filter(Boolean).join(" ").toLowerCase();
+    item.user_note,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
 }

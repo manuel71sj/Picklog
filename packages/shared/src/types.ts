@@ -10,19 +10,9 @@ export type SourceType =
   | "photo"
   | "unknown";
 
-export type MetadataKind =
-  | "shopping"
-  | "recipe"
-  | "video"
-  | "article"
-  | "photo"
-  | "unknown";
+export type MetadataKind = "shopping" | "recipe" | "video" | "article" | "photo" | "unknown";
 
-export type ItemStatus =
-  | "active"
-  | "archived"
-  | "deleted"
-  | "permanently_deleted";
+export type ItemStatus = "active" | "archived" | "deleted" | "permanently_deleted";
 
 export type SyncState = "local_only" | "pending" | "synced" | "conflict";
 export type FieldState = "ai_draft" | "needs_review" | "user_confirmed" | "user_empty";

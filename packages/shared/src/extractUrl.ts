@@ -1,8 +1,8 @@
+import { makeExtractError } from "./errors.ts";
 import { buildAiPayload, parseHtmlMetadata } from "./metadata.ts";
 import { assertValidPicklogDraft } from "./schema.ts";
-import { evaluateUrlSafety, validateFetchEnvelope } from "./urlSafety.ts";
-import { makeExtractError } from "./errors.ts";
 import type { ExtractUrlRequest, ExtractUrlResponse, FetchSummary, PicklogDraft } from "./types.ts";
+import { evaluateUrlSafety, validateFetchEnvelope } from "./urlSafety.ts";
 
 export interface MetadataFetchResult {
   content_type: string;
@@ -32,7 +32,7 @@ export async function extractUrl(request: ExtractUrlRequest, deps: ExtractUrlDep
   const envelope = validateFetchEnvelope({
     contentType: fetched.content_type,
     responseBytes: fetched.response_bytes,
-    elapsedMs: fetched.elapsed_ms
+    elapsedMs: fetched.elapsed_ms,
   });
   if (!envelope.ok) {
     return makeExtractError(request.request_id, envelope.error_code);
@@ -46,7 +46,7 @@ export async function extractUrl(request: ExtractUrlRequest, deps: ExtractUrlDep
     canonical_origin: safety.canonical_origin,
     content_type: fetched.content_type,
     fetch_status: "ok",
-    ...metadata
+    ...metadata,
   });
 
   let draft: unknown;
@@ -68,7 +68,7 @@ export async function extractUrl(request: ExtractUrlRequest, deps: ExtractUrlDep
     redirect_count: fetched.redirect_count,
     body_truncated: fetched.response_bytes >= 2 * 1024 * 1024,
     response_bytes: fetched.response_bytes,
-    elapsed_ms: fetched.elapsed_ms
+    elapsed_ms: fetched.elapsed_ms,
   };
   return {
     status: "draft",
@@ -77,7 +77,7 @@ export async function extractUrl(request: ExtractUrlRequest, deps: ExtractUrlDep
     canonical_url: safety.canonical_url,
     canonical_origin: safety.canonical_origin,
     fetch_summary,
-    draft: draft as PicklogDraft
+    draft: draft as PicklogDraft,
   };
 }
 

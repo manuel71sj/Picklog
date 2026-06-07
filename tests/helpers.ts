@@ -1,4 +1,4 @@
-import { SCHEMA_VERSION, type PicklogDraft } from "../packages/shared/src/index.ts";
+import { type PicklogDraft, SCHEMA_VERSION } from "../packages/shared/src/index.ts";
 
 export function shoppingDraft(overrides: Partial<PicklogDraft> = {}): PicklogDraft {
   return {
@@ -15,7 +15,7 @@ export function shoppingDraft(overrides: Partial<PicklogDraft> = {}): PicklogDra
     field_confidence: {
       title: 0.92,
       seller: 0.74,
-      price: 0.48
+      price: 0.48,
     },
     needs_review: ["seller", "price"],
     extraction_notes: "가격은 페이지 내 옵션에 따라 달라질 수 있어 확인 필요",
@@ -27,8 +27,8 @@ export function shoppingDraft(overrides: Partial<PicklogDraft> = {}): PicklogDra
       price: 59000,
       currency: "KRW",
       purchase_intent: "compare",
-      needs_review: ["seller", "price"]
+      needs_review: ["seller", "price"],
     },
-    ...overrides
+    ...overrides,
   };
 }

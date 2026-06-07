@@ -10,7 +10,7 @@ const AI_ALLOWLIST = new Set([
   "open_graph_image_url",
   "content_type",
   "visible_text_excerpt",
-  "fetch_status"
+  "fetch_status",
 ]);
 
 const MAX_VISIBLE_TEXT_BYTES = 8 * 1024;
@@ -39,7 +39,7 @@ export function parseHtmlMetadata(html: string): PageMetadata {
     open_graph_title: decodeEntities(matchMeta(html, "og:title")),
     open_graph_description: decodeEntities(matchMeta(html, "og:description")),
     open_graph_image_url: matchMeta(html, "og:image") ?? undefined,
-    visible_text_excerpt: truncateUtf8(visibleText, MAX_VISIBLE_TEXT_BYTES)
+    visible_text_excerpt: truncateUtf8(visibleText, MAX_VISIBLE_TEXT_BYTES),
   };
 }
 
@@ -47,9 +47,10 @@ export function buildAiPayload(input: Record<string, unknown>): Record<string, u
   const payload: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(input)) {
     if (AI_ALLOWLIST.has(key) && value !== undefined) {
-      payload[key] = key === "visible_text_excerpt" && typeof value === "string"
-        ? truncateUtf8(value, MAX_VISIBLE_TEXT_BYTES)
-        : value;
+      payload[key] =
+        key === "visible_text_excerpt" && typeof value === "string"
+          ? truncateUtf8(value, MAX_VISIBLE_TEXT_BYTES)
+          : value;
     }
   }
   return shrinkPayload(payload, MAX_AI_PAYLOAD_BYTES);
@@ -72,9 +73,12 @@ export function truncateUtf8(text: string, maxBytes: number): string {
 
 function shrinkPayload(payload: Record<string, unknown>, maxBytes: number): Record<string, unknown> {
   const encoder = new TextEncoder();
-  let next = { ...payload };
+  const next = { ...payload };
   while (encoder.encode(JSON.stringify(next)).byteLength > maxBytes && typeof next.visible_text_excerpt === "string") {
-    next.visible_text_excerpt = truncateUtf8(next.visible_text_excerpt, Math.max(0, next.visible_text_excerpt.length - 512));
+    next.visible_text_excerpt = truncateUtf8(
+      next.visible_text_excerpt,
+      Math.max(0, next.visible_text_excerpt.length - 512),
+    );
   }
   if (encoder.encode(JSON.stringify(next)).byteLength > maxBytes) {
     delete next.visible_text_excerpt;
@@ -84,8 +88,16 @@ function shrinkPayload(payload: Record<string, unknown>, maxBytes: number): Reco
 
 function matchMeta(html: string, name: string): string | undefined {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return matchFirst(html, new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']*)["'][^>]*>`, "i"))
-    ?? matchFirst(html, new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${escaped}["'][^>]*>`, "i"));
+  return (
+    matchFirst(
+      html,
+      new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']*)["'][^>]*>`, "i"),
+    ) ??
+    matchFirst(
+      html,
+      new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${escaped}["'][^>]*>`, "i"),
+    )
+  );
 }
 
 function matchFirst(input: string, pattern: RegExp): string | undefined {
@@ -97,6 +109,6 @@ function decodeEntities(value: string | undefined): string | undefined {
     ?.replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, "\"")
+    .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'");
 }

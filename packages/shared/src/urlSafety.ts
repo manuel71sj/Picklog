@@ -12,18 +12,13 @@ export const SENSITIVE_QUERY_NAMES = new Set([
   "expires",
   "session",
   "jwt",
-  "password"
+  "password",
 ]);
 
 const ALLOWED_SCHEMES = new Set(["http:", "https:"]);
 const MAX_REDIRECTS = 5;
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
-const ALLOWED_CONTENT_TYPES = [
-  "text/html",
-  "application/xhtml+xml",
-  "application/json",
-  "text/plain"
-];
+const ALLOWED_CONTENT_TYPES = ["text/html", "application/xhtml+xml", "application/json", "text/plain"];
 
 export interface UrlSafetyOptions {
   resolvedIpsByHost?: Record<string, string[]>;
@@ -151,14 +146,17 @@ function makeSafe(url: URL): SafeUrlResult {
   const normalized = new URL(url.toString());
   normalized.hash = "";
   normalized.hostname = normalized.hostname.toLowerCase();
-  if ((normalized.protocol === "https:" && normalized.port === "443") || (normalized.protocol === "http:" && normalized.port === "80")) {
+  if (
+    (normalized.protocol === "https:" && normalized.port === "443") ||
+    (normalized.protocol === "http:" && normalized.port === "80")
+  ) {
     normalized.port = "";
   }
   return {
     ok: true,
     canonical_url: normalized.toString(),
     canonical_origin: normalized.origin,
-    normalized_for_hash: normalized.toString()
+    normalized_for_hash: normalized.toString(),
   };
 }
 
@@ -185,7 +183,10 @@ function isBlockedHost(hostname: string): boolean {
 }
 
 export function isBlockedIp(input: string): boolean {
-  const ip = input.trim().toLowerCase().replace(/^\[|\]$/g, "");
+  const ip = input
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "");
   if (ip === "::1" || ip === "0:0:0:0:0:0:0:1") return true;
   if (ip.startsWith("fe80:") || ip.startsWith("fc") || ip.startsWith("fd")) return true;
   if (ip === "169.254.169.254" || ip === "100.100.100.200") return true;

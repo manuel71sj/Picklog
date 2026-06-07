@@ -1,5 +1,5 @@
-import { computeRequestHash } from "./urlSafety.ts";
 import type { ExtractUrlRequest, ExtractUrlResponse } from "./types.ts";
+import { computeRequestHash } from "./urlSafety.ts";
 
 export type IdempotencyState =
   | "in_progress"
@@ -17,7 +17,9 @@ export interface IdempotencyEntry {
 export class IdempotencyStore {
   private entries = new Map<string, IdempotencyEntry>();
 
-  begin(request: ExtractUrlRequest): { proceed: true; key: string; request_hash: string } | { proceed: false; response: ExtractUrlResponse } {
+  begin(
+    request: ExtractUrlRequest,
+  ): { proceed: true; key: string; request_hash: string } | { proceed: false; response: ExtractUrlResponse } {
     const request_hash = computeRequestHash(request.url, request.client_schema_version);
     const key = `${request.device_id}:${request.request_id}`;
     const existing = this.entries.get(key);
@@ -34,8 +36,8 @@ export class IdempotencyStore {
           error_code: "idempotency_conflict",
           retryable: false,
           manual_save_allowed: false,
-          message_key: "extract.idempotency_conflict"
-        }
+          message_key: "extract.idempotency_conflict",
+        },
       };
     }
     if (existing.state === "in_progress") {
@@ -47,8 +49,8 @@ export class IdempotencyStore {
           error_code: "idempotency_in_progress",
           retryable: true,
           manual_save_allowed: false,
-          message_key: "extract.idempotency_in_progress"
-        }
+          message_key: "extract.idempotency_in_progress",
+        },
       };
     }
     if (existing.response && existing.state !== "retryable_error_not_cached") {
@@ -65,7 +67,10 @@ export class IdempotencyStore {
       this.entries.set(key, { ...existing, state: "terminal_success", response });
       return;
     }
-    if (response.retryable && ["fetch_timeout", "metadata_failed", "ai_timeout", "schema_invalid"].includes(response.error_code)) {
+    if (
+      response.retryable &&
+      ["fetch_timeout", "metadata_failed", "ai_timeout", "schema_invalid"].includes(response.error_code)
+    ) {
       this.entries.set(key, { ...existing, state: "retryable_error_not_cached" });
       return;
     }

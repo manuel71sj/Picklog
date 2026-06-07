@@ -1,6 +1,6 @@
 import { PicklogStore } from "./store.ts";
-import { validateClientUrl } from "./urlSafety.ts";
 import type { SourceType } from "./types.ts";
+import { validateClientUrl } from "./urlSafety.ts";
 
 export interface AlphaDatasetRow {
   id: string;
@@ -56,7 +56,7 @@ export function evaluateAlphaDataset(rows: AlphaDatasetRow[]): AlphaEvalResult {
       category: row.category,
       use_case: row.use_case,
       tags: row.tags,
-      user_note: row.why_saved
+      user_note: row.why_saved,
     });
     if (row.seller || row.price !== undefined) {
       item.metadata_json = {
@@ -65,7 +65,7 @@ export function evaluateAlphaDataset(rows: AlphaDatasetRow[]): AlphaEvalResult {
         product_name: row.title,
         price: row.price ?? null,
         currency: row.price === undefined ? null : "KRW",
-        needs_review: row.needs_review_fields
+        needs_review: row.needs_review_fields,
       };
     }
 
@@ -91,6 +91,6 @@ export function evaluateAlphaDataset(rows: AlphaDatasetRow[]): AlphaEvalResult {
     safety_block_rate: blockedTotal === 0 ? 1 : blockedPassed / blockedTotal,
     search_success_rate: searchableTotal === 0 ? 1 : searchablePassed / searchableTotal,
     must_hit_field_rate: mustHitTotal === 0 ? 1 : mustHitPassed / mustHitTotal,
-    review_label_rate: reviewTotal === 0 ? 1 : reviewPassed / reviewTotal
+    review_label_rate: reviewTotal === 0 ? 1 : reviewPassed / reviewTotal,
   };
 }

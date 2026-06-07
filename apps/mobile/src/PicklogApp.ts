@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { PicklogStore, SCHEMA_VERSION, validateClientUrl, type ItemRecord } from "../../../packages/shared/src/index.ts";
+import {
+  type ItemRecord,
+  PicklogStore,
+  SCHEMA_VERSION,
+  validateClientUrl,
+} from "../../../packages/shared/src/index.ts";
 
 const TOUCH = 44;
 
@@ -24,7 +29,7 @@ export function PicklogApp() {
       title: safety.canonical_url,
       category: "inbox",
       use_case: "saved for later",
-      tags: ["manual"]
+      tags: ["manual"],
     });
     setItems(store.search({ query }));
     setUrl("");
@@ -56,14 +61,21 @@ export function PicklogApp() {
         multiline: true,
         onChangeText: setUrl,
         placeholder: "https://example.com/item",
-        style: { minHeight: 88, borderWidth: 1, borderColor: "#C9C2B8", padding: 12, borderRadius: 8, backgroundColor: "white" },
-        value: url
+        style: {
+          minHeight: 88,
+          borderWidth: 1,
+          borderColor: "#C9C2B8",
+          padding: 12,
+          borderRadius: 8,
+          backgroundColor: "white",
+        },
+        value: url,
       }),
       error
         ? React.createElement(
             Text,
             { accessibilityLiveRegion: "polite", style: { color: error.startsWith("Ready") ? "#265A3A" : "#A13A2A" } },
-            error
+            error,
           )
         : null,
       React.createElement(
@@ -75,9 +87,15 @@ export function PicklogApp() {
             accessibilityLabel: "Validate link",
             accessibilityHint: "Checks URL format before server extraction",
             onPress: validateOnly,
-            style: { minHeight: TOUCH, justifyContent: "center", paddingHorizontal: 16, borderRadius: 8, backgroundColor: "#233147" }
+            style: {
+              minHeight: TOUCH,
+              justifyContent: "center",
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              backgroundColor: "#233147",
+            },
           },
-          React.createElement(Text, { style: { color: "white", fontWeight: "700" } }, "Validate")
+          React.createElement(Text, { style: { color: "white", fontWeight: "700" } }, "Validate"),
         ),
         React.createElement(
           TouchableOpacity,
@@ -85,10 +103,16 @@ export function PicklogApp() {
             accessibilityLabel: "Manual save",
             accessibilityHint: "Saves a safe URL without AI extraction",
             onPress: saveManual,
-            style: { minHeight: TOUCH, justifyContent: "center", paddingHorizontal: 16, borderRadius: 8, backgroundColor: "#E7DED2" }
+            style: {
+              minHeight: TOUCH,
+              justifyContent: "center",
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              backgroundColor: "#E7DED2",
+            },
           },
-          React.createElement(Text, { style: { color: "#18202A", fontWeight: "700" } }, "Manual Save")
-        )
+          React.createElement(Text, { style: { color: "#18202A", fontWeight: "700" } }, "Manual Save"),
+        ),
       ),
       React.createElement(TextInput, {
         accessibilityLabel: "Search saved items",
@@ -97,8 +121,15 @@ export function PicklogApp() {
           setItems(store.search({ query: text }));
         },
         placeholder: "Search title, category, tags, seller",
-        style: { minHeight: TOUCH, borderWidth: 1, borderColor: "#C9C2B8", padding: 12, borderRadius: 8, backgroundColor: "white" },
-        value: query
+        style: {
+          minHeight: TOUCH,
+          borderWidth: 1,
+          borderColor: "#C9C2B8",
+          padding: 12,
+          borderRadius: 8,
+          backgroundColor: "white",
+        },
+        value: query,
       }),
       React.createElement(
         View,
@@ -110,12 +141,16 @@ export function PicklogApp() {
             React.createElement(
               Text,
               { numberOfLines: 2, style: { fontSize: 16, fontWeight: "700", color: "#18202A" } },
-              item.title
+              item.title,
             ),
-            React.createElement(Text, { style: { color: "#5D6670" } }, `${item.category ?? "uncategorized"} · ${item.source_type}`)
-          )
-        )
-      )
-    )
+            React.createElement(
+              Text,
+              { style: { color: "#5D6670" } },
+              `${item.category ?? "uncategorized"} · ${item.source_type}`,
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }

@@ -8,11 +8,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": [
-    "apps/**/*.ts",
-    "apps/**/*.tsx",
-    "packages/**/*.ts",
-    "supabase/**/*.ts",
-    "tests/**/*.ts"
-  ]
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "supabase/**/*.ts", "tests/**/*.ts"]
 }
