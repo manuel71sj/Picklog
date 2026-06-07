@@ -486,3 +486,48 @@ Alpha Slice 1은 다음 조건을 모두 만족하면 완료다.
 - 30개 Alpha 데이터셋 기준을 통과한다.
 - 개인정보와 AI 처리 고지가 앱 안에 존재한다.
 - Beta 전환을 위한 identity/sync/tombstone/usage 계약이 데이터 모델에 반영된다.
+
+## 8. 구현 완료 기록
+
+작성일: 2026-06-07
+검증 명령: `/Users/manuel71/Library/pnpm/.tools/pnpm-exe/10.33.0/pnpm run verify`
+검증 결과: typecheck, Biome check, Node test 19개 통과
+
+### 완료된 항목
+
+- OH-1부터 OH-6까지 구현 진행을 위한 Alpha 가정을 `docs/alpha-slice-1-office-hours.md`에 기록했다.
+- E01 프로젝트 골격과 품질 게이트를 구현했다.
+  - pnpm workspace, root package script, Biome lint/formatter, Node test runner, shared package, Expo app skeleton, Supabase Edge Function skeleton을 구성했다.
+- E02 로컬 데이터 모델과 마이그레이션을 구현했다.
+  - `items`, `extractions`, `price_observations`, `attachments`, `sync_queue`, `usage_events` schema와 in-memory domain store를 작성했다.
+  - `active`, `archived`, `deleted`, `permanently_deleted` 상태 전환과 영구 삭제 scrub/cascade 테스트를 추가했다.
+- E03 URL parser와 안전 게이트를 구현했다.
+  - client URL validation, server URL safety, scheme allowlist, userinfo 차단, 민감 query 차단, 사설/metadata IP 차단, redirect 재검증, response size/content type/timeout envelope 테스트를 추가했다.
+- E04 `/extract-url` API 계약과 idempotency를 구현했다.
+  - request hash, in-progress replay, terminal success replay, conflict, retryable/nonretryable error envelope를 shared 계약과 테스트로 고정했다.
+- E05 Metadata Fetcher와 AI Boundary 계약을 구현했다.
+  - script-free metadata parser, visible text 8KB 제한, AI payload allowlist, payload 16KB 제한, raw output 7일 만료/cleanup 테스트를 추가했다.
+- E06 `picklog_item_v1` schema validator를 구현했다.
+  - 필수 필드, metadata kind variant, source type/kind 매핑, field confidence, needs_review, low-confidence price/seller 표시 규칙 테스트를 추가했다.
+- E07 링크 입력과 추출 상태 UI를 구현했다.
+  - 앱 내부 URL 입력, 추출 상태, 취소, retryable error, manual save 노출 제어, 접근성 label/hint, 긴 URL 입력 영역을 구현했다.
+- E08 확인/수정 화면을 구현했다.
+  - 핵심 필드, 출처 variant, "확인 필요" 텍스트 label, 사용자 수정/비움 상태, 재추출, 저장 전 필수 필드 validation을 구현했다.
+- E09 로컬 저장과 리스트 반영을 구현했다.
+  - draft/manual save를 shared store에 연결하고, extraction snapshot, price observation, usage event, sync queue local audit event, partial write rollback 테스트를 추가했다.
+- E10 검색과 필터를 구현했다.
+  - title, category, use_case, tags, seller, metadata, source_type, user_note 검색과 category/source/price/seller/tag/archive/sort UI를 구현했다.
+- E11 상세, 아카이브, 삭제, 복원을 구현했다.
+  - 상세, 원본 링크 열기, 메모 수정, archive/restore/delete/permanent delete controls와 permanent delete cascade/scrub 테스트를 추가했다.
+- E12 개인정보, AI 처리 고지, Alpha 설정을 구현했다.
+  - 앱 안에 AI 전송 범위, 기본 비공개, 로컬 데이터 유실 가능성, 삭제 가능성, usage counter placeholder를 표시했다.
+- E13 30개 Alpha 데이터셋과 eval을 구현했다.
+  - 30-row fixture와 safety block, must-hit field, review label, search rediscovery threshold eval을 추가했다.
+
+### 외부 또는 Beta 전환 전 확인 필요
+
+- 실제 Alpha 사용자 인터뷰로 `docs/alpha-slice-1-office-hours.md`의 가정을 관찰 결과로 교체해야 한다.
+- Expo 의존성 설치 후 실제 iOS/Android 런타임에서 화면과 터치 동작을 확인해야 한다.
+- 현재 shared store를 `expo-sqlite` adapter에 연결하는 런타임 repository 검증이 필요하다.
+- Supabase local serving/deploy와 실제 AI provider structured output adapter 연결은 provider 정책 승인 후 확인해야 한다.
+- 외부 Beta 전에 AI provider no-training/retention, 로컬 DB 암호화 또는 OS 보안 등가성, 다음 슬라이스 우선순위를 ADR로 확정해야 한다.

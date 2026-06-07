@@ -11,7 +11,9 @@
 - E05 metadata/AI boundary: script-free metadata parsing, AI payload allowlist, 8KB visible text limit, 16KB payload limit, raw output expiry.
 - E06 `picklog_item_v1`: variant validator, source_type/kind mapping, low-confidence price/seller review invariant.
 - E07-E11 local behavior contracts: manual save path, draft save conversion, field states, list/search/filter, archive/delete/restore/permanent delete and scrub.
+- E07-E12 Expo Alpha UI: link input, extraction/retry/manual-save states, review/edit, save/list/search/filter, detail/archive/delete/restore/permanent-delete controls, privacy/AI notice, local usage counter.
 - E13 Alpha dataset: 30-row fixture and eval thresholds for search, safety, must-hit fields, and review labels.
+- Office Hours implementation assumptions: `docs/alpha-slice-1-office-hours.md`.
 
 ## 검증 증거
 
